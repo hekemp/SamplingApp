@@ -1,0 +1,765 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+
+	<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+	<script type="text/javascript">
+
+	var weightDisplayed = true;
+
+	var galootPopulationArray;
+	var sampleWeightArray;
+	var sampleProportionArray;
+	var samplePercentageWeightArray;
+	var samplePercentageProportionArray;
+	var trace;
+	var data;
+	var maxProportion;
+	var maxWeight;
+	var minProportion;
+	var minWeight;
+	var standardDeviationWeight;
+	var standardDeviationProportion;
+	var meanWeight;
+	var meanProportion;
+	var xAxisWeight = [];
+	var xAxisProportion = [0,1];
+
+	var distributionWeightArray = [];
+	var distributionProportionArray = [];
+	var distributionPercentageWeightArray = [];
+	var distributionPercentageProportionArray = [];
+
+	var distributionWeightArrayNarrow = [];
+	var distributionProportionArrayNarrow = [];
+	var distributionPercentageWeightArrayNarrow = [];
+	var distributionPercentageProportionArrayNarrow = [];
+
+	var mySampleSize = 40;
+
+	for(var i = 0; i <= 28; i++){
+		xAxisWeight[i] = i;
+	}
+
+	var xAxisProportionDistribution = [];
+	for(var i = 0; i <= 100; i++) {
+		xAxisProportionDistribution[i] = i/100;
+	}
+
+	var xAxisWeightDistribution = [];
+	for(var i = 0; i <= 27; i++) {
+		xAxisWeightDistribution[i] = i + 2;
+	}
+
+	//.10 - .30
+	var xAxisProportionDistributionNarrow = [];
+	for(var i = 0; i <= 20; i++) {
+		xAxisProportionDistributionNarrow[i] = .1 + (i/100) ;
+	}
+
+	// 12 - 14
+	var xAxisWeightDistributionNarrow = [];
+	for(var i = 0; i <= 20; i++) {
+		xAxisWeightDistributionNarrow[i] = 12 + i/10;
+	}
+
+	var rowLocation = 1;
+
+	function csvToArray (csv) {
+	rows  = csv.split("\n");
+	return rows.map(function (row) {
+		return row.split(",");
+	});
+};
+
+Array.prototype.stanDeviate = function(){
+   var i,j,total = 0, mean = 0, diffSqredArr = [];
+   for(i=0;i<this.length;i+=1){
+       total+=this[i];
+   }
+   mean = total/this.length;
+   for(j=0;j<this.length;j+=1){
+       diffSqredArr.push(Math.pow((this[j]-mean),2));
+   }
+   return (Math.sqrt(diffSqredArr.reduce(function(firstEl, nextEl){
+            return firstEl + nextEl;
+          })/this.length));
+};
+
+function arrayMin(arr) {
+  var len = arr.length, min = Infinity;
+  while (len--) {
+    if (arr[len] < min) {
+      min = arr[len];
+    }
+  }
+  return min;
+};
+
+function arrayMax(arr) {
+  var len = arr.length, max = -Infinity;
+  while (len--) {
+    if (arr[len] > max) {
+      max = arr[len];
+    }
+  }
+  return max;
+};
+
+function arrayMean(arr) {
+	var total = 0;
+	for(var i = 0; i < arr.length; i++) {
+    total += arr[i];
+	}
+	return total / arr.length;
+};
+
+function round(value, decimals) {
+  return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+};
+
+	function getNewSample (sampleSize) {
+		sampleWeightArray = [];
+		samplePercentageWeightArray = [];
+
+		for(var i = 0; i <= 28; i++){
+			samplePercentageWeightArray[i] = 0;
+		}
+		for (var i = 0; i < sampleSize; i++) {
+		var sampleNumber = Math.floor(Math.random() * galootPopulationArray.length)
+		sampleWeightArray.push(parseFloat(galootPopulationArray[sampleNumber][0]));
+		samplePercentageWeightArray[Math.round(galootPopulationArray[sampleNumber][0])] = samplePercentageWeightArray[Math.round(galootPopulationArray[sampleNumber][0])] + round(((1/sampleSize) * 100),2);
+		}
+
+		sampleProportionArray = [];
+		samplePercentageProportionArray = [];
+		for(var i = 0; i <= 1; i++){
+			samplePercentageProportionArray[i] = 0;
+		}
+		for (var i = 0; i < sampleSize; i++) {
+		var sampleNumber = Math.floor(Math.random() * galootPopulationArray.length)
+		sampleProportionArray.push(parseInt(galootPopulationArray[sampleNumber][1]));
+		samplePercentageProportionArray[Math.round(galootPopulationArray[sampleNumber][1])] = samplePercentageProportionArray[Math.round(galootPopulationArray[sampleNumber][1])] + round(((1/sampleSize) * 100),2);
+
+		}
+
+	  maxProportion = arrayMax(sampleProportionArray);
+		maxWeight = arrayMax(sampleWeightArray);
+
+		var elemMax = document.getElementById("myMax");
+		elemMax.textContent = round(maxWeight,2) + " lbs [] _.";
+
+
+		minProportion = arrayMin(sampleProportionArray);
+		minWeight = arrayMin(sampleWeightArray);
+
+		var elemMin = document.getElementById("myMin");
+		elemMin.textContent = round(minWeight,2) + " lbs [] _.";
+
+
+		standardDeviationWeight = sampleWeightArray.stanDeviate();
+		standardDeviationProportion = sampleProportionArray.stanDeviate();
+
+		var elemSD = document.getElementById("myStandardDeviation");
+		elemSD.textContent = round(standardDeviationWeight,2) + " lbs [] _.";
+
+
+		meanWeight = arrayMean(sampleWeightArray);
+		meanProportion = arrayMean(sampleProportionArray);
+		var elemMean = document.getElementById("myMean");
+		elemMean.textContent = round(meanWeight,2) + " lbs [] " + round(meanProportion,2) + ".";
+
+		// Math.round() the value and then + the 1/sample size to it
+
+
+
+	};
+
+	$(document).ready(function() {
+    $.get('GalootPopulation.csv', function(data) {
+        // Here you can do whatever you want with the data
+        //$(data).find('option').each(function() {
+        //   alert($(this).text());
+				galootPopulationArray = csvToArray(data);
+
+				getNewSample(mySampleSize);
+
+				trace = {
+				x: xAxisWeight,
+    		y: samplePercentageWeightArray,
+    		type: 'bar',
+  			};
+
+				data = [trace];
+// 15% max
+
+				Plotly.newPlot('weightPercentage', data ,{title:'Current Galoot Sample', xaxis: {title: 'Weight (In Pounds)'},yaxis:{title:'', range: [0,16], ticksuffix: '%'}, font: {size: 16}});
+
+				trace2 = {
+					x: xAxisProportion,
+					y: samplePercentageProportionArray,
+					type: 'bar',
+				};
+//100% max
+				data2 = [trace2];
+				Plotly.newPlot('proportionPercentage', data2 ,{title:'Current Galoot Sample',xaxis: {title: 'Cares For Offsprings'}, yaxis:{title:'', range: [0,100], ticksuffix: '%'}, font: {size: 16}});
+
+				trace3 = {
+				x: xAxisWeightDistribution,
+    		y: distributionPercentageWeightArray,
+    		type: 'bar',
+  			};
+
+				data3 = [trace3];
+// 100% max
+
+				Plotly.newPlot('weightPercentageTotal', data3 ,{title:'Sampling Distribution for the Sample Mean Weight', xaxis: {title: 'Weight (In Pounds)', range: [2,29]},yaxis:{title:'', ticksuffix: '%'}, font: {size: 16}});
+
+
+				trace4 = {
+					x: xAxisProportionDistribution,
+					y: distributionPercentageProportionArray,
+					type: 'bar',
+				};
+//100% max
+				data4 = [trace4];
+
+				Plotly.newPlot('proportionPercentageTotal', data4 ,{title:'Sampling Distribution for the Sample Mean Proportion',xaxis: {title: 'Proportion Caring For Offspring', range: [0,1], tickformat: '.1f'}, yaxis:{title:'', ticksuffix: '%'}, font: {size: 16}});
+
+				trace5 = {
+				x: xAxisWeightDistributionNarrow,
+				y: distributionPercentageWeightArrayNarrow,
+				type: 'bar',
+				};
+
+				data5 = [trace5];
+// 100% max
+
+				Plotly.newPlot('weightPercentageNarrowed', data5 ,{title:'Sampling Distribution for the Sample Mean Weight', xaxis: {title: 'Weight (In Pounds)', range: [12,14], tickformat: '.1f'},yaxis:{title:'', ticksuffix: '%'}, font: {size: 16}});
+
+
+				trace6 = {
+					x: xAxisProportionDistributionNarrow,
+					y: distributionPercentageProportionArrayNarrow,
+					type: 'bar',
+				};
+//100% max
+				data6 = [trace6];
+
+				Plotly.newPlot('proportionPercentageNarrowed', data6 ,{title:'Sampling Distribution for the Sample Mean Proportion',xaxis: {title: 'Proportion Caring For Offspring', range: [.1,.3], tickformat: '.2f'}, yaxis:{title:'', ticksuffix: '%'},  font: {size: 16}});
+
+    });
+
+	});
+
+
+		var drawASample = function() {
+
+			getNewSample(mySampleSize);
+
+			Plotly.restyle('weightPercentage', 'y', [samplePercentageWeightArray]);
+			Plotly.restyle('proportionPercentage', 'y', [samplePercentageProportionArray]);
+		}
+
+		window.onload = function() {
+			(document.getElementById("drawSample")).onclick = drawASample;
+			(document.getElementById("storeSample")).onclick = storeASample;
+		};
+
+
+		function refactorDistributionPercentage(arrayVal) {
+			var percentageVal = [];
+			for(var i = 0; i < arrayVal.length; i++){
+				if(isNaN(percentageVal[arrayVal[i]])){
+					percentageVal[arrayVal[i]*10] = 0;
+				}
+				percentageVal[arrayVal[i]*10] = percentageVal[arrayVal[i]*10] + round(((1/arrayVal.length) * 100),2);
+			}
+		  return percentageVal; //percentageVal;
+
+			/*
+
+			samplePercentageWeightArray[Math.round(galootPopulationArray[sampleNumber][0])] = samplePercentageWeightArray[Math.round(galootPopulationArray[sampleNumber][0])] + round(((1/sampleSize) * 100),2);
+
+			*/
+		};
+
+		var countOccurence = function(x, myArray) {
+			return myArray.filter(function(y){
+				return x === y;
+			}).length;
+		}
+
+		var removeDuplicates = function(myArray){
+			return Array.from(new Set(myArray));
+		}
+
+		var transformArray = function(myArray) {
+			var noDups  = removeDuplicates(myArray);
+			var percentageArray = noDups.map(function(x){
+				return countOccurence(x, myArray) * 100 / myArray.length;
+			});
+			return {x: noDups, y: percentageArray};
+		}
+
+		var storeASample = function() {
+			if (sampleWeightArray.length != 0 && sampleProportionArray.length != 0) {
+				var elemError = document.getElementById("sampleError");
+				elemError.textContent = "";
+
+
+
+				distributionWeightArray[distributionWeightArray.length] = Math.round(meanWeight);
+				distributionProportionArray[distributionProportionArray.length] = round(meanProportion,1);
+				distributionWeightArrayNarrow[distributionWeightArrayNarrow.length] = round(meanWeight,1);
+				distributionProportionArrayNarrow[distributionProportionArrayNarrow.length] = round(meanProportion,2);
+
+				/// vvv nodups
+				xAxisWeightDistribution = transformArray(distributionWeightArray).x;
+				xAxisProportionDistribution = transformArray(distributionProportionArray).x;
+				xAxisWeightDistributionNarrow = transformArray(distributionWeightArrayNarrow).x;
+				xAxisProportionDistributionNarrow = transformArray(distributionProportionArrayNarrow).x;
+
+				/// vvv percentages
+				distributionPercentageWeightArray = transformArray(distributionWeightArray).y;
+				distributionPercentageProportionArray = transformArray(distributionProportionArray).y;
+				distributionPercentageWeightArrayNarrow = transformArray(distributionWeightArrayNarrow).y;
+				distributionPercentageProportionArrayNarrow = transformArray(distributionProportionArrayNarrow).y;
+
+				console.log(xAxisWeightDistributionNarrow);
+				console.log(xAxisWeightDistribution);
+
+				var update1 = {
+    			'xaxis.range': [arrayMin(xAxisWeightDistributionNarrow)-.5, arrayMax(xAxisWeightDistributionNarrow)+.5],   // updates the xaxis range
+				};
+				var update2 = {
+    			'xaxis.range': [arrayMin(xAxisProportionDistributionNarrow)-.05, arrayMax(xAxisProportionDistributionNarrow) + .05],   // updates the xaxis range
+				};
+
+				var widthsForWColumns = Array(distributionPercentageWeightArray.length).fill(.8);
+				var widthsForPColumns = Array(distributionPercentageProportionArray.length).fill(.08);
+				var widthsForWNColumns = Array(distributionPercentageWeightArrayNarrow.length).fill(.08);
+				var widthsForPNColumns = Array(distributionPercentageProportionArrayNarrow.length).fill(.008);
+
+				console.log([distributionPercentageWeightArrayNarrow]);
+
+
+				Plotly.relayout('weightPercentageNarrowed', update1);
+				Plotly.relayout('proportionPercentageNarrowed', update2);
+
+				Plotly.restyle('weightPercentageTotal', 'x', [xAxisWeightDistribution]);
+				Plotly.restyle('proportionPercentageTotal', 'x', [xAxisProportionDistribution]);
+				Plotly.restyle('weightPercentageTotal', 'y', [distributionPercentageWeightArray]);
+				Plotly.restyle('proportionPercentageTotal', 'y', [distributionPercentageProportionArray]);
+
+				Plotly.restyle('weightPercentageNarrowed', 'x', [xAxisWeightDistributionNarrow]);
+				Plotly.restyle('proportionPercentageNarrowed', 'x', [xAxisProportionDistributionNarrow]);
+				Plotly.restyle('weightPercentageNarrowed', 'y', [distributionPercentageWeightArrayNarrow]);
+				Plotly.restyle('proportionPercentageNarrowed', 'y', [distributionPercentageProportionArrayNarrow]);
+
+				Plotly.restyle('weightPercentageTotal', 'width', [widthsForWColumns]);
+				Plotly.restyle('proportionPercentageTotal', 'width', [widthsForPColumns]);
+				Plotly.restyle('weightPercentageNarrowed', 'width', [widthsForWNColumns]);
+				Plotly.restyle('proportionPercentageNarrowed', 'width', [widthsForPNColumns]);
+
+
+
+				storeToTable();
+
+			}
+
+			else { // sample hasn't been drawn because there isn't a sample available.
+			// Should never happen given our design of starting with a sample but this will cover the case.
+			var elemError = document.getElementById("sampleError");
+			elemError.textContent = "Please draw a sample before attempting to store a sample.";
+
+			}
+
+		}
+
+		var storeASample2 = function() {
+
+			//var sampleWeightArray;
+			//var sampleProportionArray;
+
+			if (sampleWeightArray.length != 0 && sampleProportionArray.length != 0) {
+				var elemError = document.getElementById("sampleError");
+				elemError.textContent = "";
+
+				distributionPercentageWeightArray = [];
+				distributionPercentageProportionArray = [];
+
+				distributionWeightArray[distributionWeightArray.length] = Math.round(meanWeight);
+				distributionProportionArray[distributionProportionArray.length] = round(meanProportion,2);
+
+				var percentageVal = [];
+				for(var i = 0; i <= 100; i++) {
+					percentageVal[i] = 0;
+				}
+				for(var i = 0; i < distributionProportionArray.length; i++){
+					percentageVal[distributionProportionArray[i]*100] = percentageVal[distributionProportionArray[i]*100] + round(((1/distributionProportionArray.length) * 100),2);
+				}
+
+				//distributionPercentageWeightArray = refactorDistributionPercentage(distributionWeightArray);
+				distributionPercentageProportionArray = percentageVal;
+
+				percentageVal = [];
+				for(var i = 0; i <= 27; i++) {
+					percentageVal[i] = 0;
+				}
+				for(var i = 0; i < distributionWeightArray.length; i++){
+					percentageVal[distributionWeightArray[i]-2] = percentageVal[distributionWeightArray[i]-2] + round(((1/distributionWeightArray.length) * 100),2);
+				}
+
+				distributionPercentageWeightArray = percentageVal;
+
+
+				Plotly.restyle('weightPercentageTotal', 'x', [xAxisWeightDistribution]);
+				Plotly.restyle('proportionPercentageTotal', 'x', [xAxisProportionDistribution]);
+				Plotly.restyle('weightPercentageTotal', 'y', [distributionPercentageWeightArray]);
+				Plotly.restyle('proportionPercentageTotal', 'y', [distributionPercentageProportionArray]);
+
+
+
+				distributionPercentageWeightArrayNarrow = [];
+				distributionPercentageProportionArrayNarrow = [];
+
+				distributionWeightArrayNarrow[distributionWeightArrayNarrow.length] = round(meanWeight,1);
+				distributionProportionArrayNarrow[distributionProportionArrayNarrow.length] = round(meanProportion,2);
+
+				/*.10 - .30
+				var xAxisProportionDistributionNarrow = [];
+				for(var i = 0; i <= 20; i++) {
+					xAxisProportionDistributionNarrow[i] = .1 + (i/100) ;
+				}
+
+				// 12 - 14
+				var xAxisWeightDistributionNarrow = [];
+				for(var i = 0; i <= 20; i++) {
+					xAxisWeightDistributionNarrow[i] = 2 + i/10;
+				}*/
+
+				// vvvv the y
+
+				percentageVal = [];
+				for(var i = 0; i <= 20; i++) {
+					percentageVal[i] = 0;
+				}
+				for(var i = 0; i < distributionProportionArrayNarrow.length; i++){
+					percentageVal[(distributionProportionArrayNarrow[i] * 100) - 10 ] = percentageVal[(distributionProportionArrayNarrow[i] * 100) - 10 ] + round(((1/distributionProportionArrayNarrow.length) * 100),2);
+				}
+
+				//distributionPercentageWeightArray = refactorDistributionPercentage(distributionWeightArray);
+				distributionPercentageProportionArrayNarrow = percentageVal;
+
+
+
+				percentageVal = [];
+				for(var i = 0; i <= 20; i++) {
+					percentageVal[i] = 0;
+				}
+				for(var i = 0; i < distributionWeightArrayNarrow.length; i++){
+					percentageVal[(distributionWeightArrayNarrow[i]*10)-120] = percentageVal[(distributionWeightArrayNarrow[i]*10)-120] + round(((1/distributionWeightArrayNarrow.length) * 100),2);
+				}
+
+				distributionPercentageWeightArrayNarrow = percentageVal;
+
+				console.log(distributionPercentageWeightArrayNarrow);
+
+				Plotly.restyle('weightPercentageNarrowed', 'x', [xAxisWeightDistributionNarrow]);
+				Plotly.restyle('proportionPercentageNarrowed', 'x', [xAxisProportionDistributionNarrow]);
+				Plotly.restyle('weightPercentageNarrowed', 'y', [distributionPercentageWeightArrayNarrow]);
+				Plotly.restyle('proportionPercentageNarrowed', 'y', [distributionPercentageProportionArrayNarrow]);
+
+				storeToTable();
+
+			}
+
+			else { // sample hasn't been drawn because there isn't a sample available.
+			// Should never happen given our design of starting with a sample but this will cover the case.
+			var elemError = document.getElementById("sampleError");
+			elemError.textContent = "Please draw a sample before attempting to store a sample.";
+
+			}
+
+		}
+
+		function switchWeight(){
+			weightDisplayed = true;
+			$("#weightPercentageNarrowed").css("display", "");
+			$("#weightPercentageTotal").css("display", "");
+			$("#proportionPercentageNarrowed").css("display", "none");
+			$("#proportionPercentageTotal").css("display", "none");
+			redrawSampleGraphs();
+		}
+
+		function switchOffspring(){
+			weightDisplayed = false;
+			$("#weightPercentageNarrowed").css("display", "none");
+			$("#weightPercentageTotal").css("display", "none");  // To hide
+			$("#proportionPercentageTotal").css("display", "");
+			$("#proportionPercentageNarrowed").css("display", "");  // To unhide
+			redrawSampleGraphs();
+		}
+
+		function storeToTable() {
+			console.log("hello");
+			var table = document.getElementById("myTable");
+    	var row = table.insertRow(rowLocation);
+    	var cell1 = row.insertCell(0);
+    	var cell2 = row.insertCell(1);
+			var cell3 = row.insertCell(2);
+    	cell1.innerHTML = rowLocation;
+    	cell2.innerHTML = round(meanWeight,2);
+			cell3.innerHTML = round(meanProportion,2);
+			rowLocation = rowLocation + 1;
+
+		}
+
+		function clearTable() {
+			var table = document.getElementById("myTable");
+			table.innerHTML = "<tr><td><b>Sample Number</b></td><td><b>Weight (in lbs)</b></td><td><b>Proportion</b></td></tr>";
+			rowLocation = 1;
+		}
+
+		function clearSampleGraphs(){
+
+			distributionWeightArray = [];
+			distributionProportionArray = [];
+			distributionPercentageWeightArray = [];
+			distributionPercentageProportionArray = [];
+
+			distributionWeightArrayNarrow = [];
+			distributionProportionArrayNarrow = [];
+			distributionPercentageWeightArrayNarrow = [];
+			distributionPercentageProportionArrayNarrow = [];
+
+			trace3 = {
+			x: xAxisWeightDistribution,
+			y: distributionPercentageWeightArray,
+			type: 'bar',
+			};
+
+			data3 = [trace3];
+// 100% max
+
+			Plotly.newPlot('weightPercentageTotal', data3 ,{title:'Sampling Distribution for the Sample Mean Weight', xaxis: {title: 'Weight (In Pounds)', range: [2,29]},yaxis:{title:'', ticksuffix: '%'}, font: {size: 16}});
+
+
+			trace4 = {
+				x: xAxisProportionDistribution,
+				y: distributionPercentageProportionArray,
+				type: 'bar',
+			};
+//100% max
+			data4 = [trace4];
+
+			Plotly.newPlot('proportionPercentageTotal', data4 ,{title:'Sampling Distribution for the Sample Mean Proportion',xaxis: {title: 'Proportion Caring For Offspring', range: [0,1], tickformat: '.1f'}, yaxis:{title:'', ticksuffix: '%'}, font: {size: 16}});
+
+			trace5 = {
+			x: xAxisWeightDistributionNarrow,
+			y: distributionPercentageWeightArrayNarrow,
+			type: 'bar',
+			};
+
+			data5 = [trace5];
+// 100% max
+
+			Plotly.newPlot('weightPercentageNarrowed', data5 ,{title:'Sampling Distribution for the Sample Mean Weight', xaxis: {title: 'Weight (In Pounds)', range: [12,14], tickformat: '.1f'},yaxis:{title:'', ticksuffix: '%'}, font: {size: 16}});
+
+
+			trace6 = {
+				x: xAxisProportionDistributionNarrow,
+				y: distributionPercentageProportionArrayNarrow,
+				type: 'bar',
+			};
+//100% max
+			data6 = [trace6];
+
+			Plotly.newPlot('proportionPercentageNarrowed', data6 ,{title:'Sampling Distribution for the Sample Mean Proportion',xaxis: {title: 'Proportion Caring For Offspring', range: [.1,.3], tickformat: '.2f'}, yaxis:{title:'', ticksuffix: '%'},  font: {size: 16}});
+
+		}
+
+		function redrawSampleGraphs() {
+
+
+			trace3 = {
+			x: xAxisWeightDistribution,
+			y: distributionPercentageWeightArray,
+			type: 'bar',
+			};
+
+			data3 = [trace3];
+// 100% max
+
+			Plotly.newPlot('weightPercentageTotal', data3 ,{title:'Sampling Distribution for the Sample Mean Weight', xaxis: {title: 'Weight (In Pounds)', range: [2,29]},yaxis:{title:'', ticksuffix: '%'}, font: {size: 16}});
+
+
+			trace4 = {
+				x: xAxisProportionDistribution,
+				y: distributionPercentageProportionArray,
+				type: 'bar',
+			};
+//100% max
+			data4 = [trace4];
+
+			Plotly.newPlot('proportionPercentageTotal', data4 ,{title:'Sampling Distribution for the Sample Mean Proportion',xaxis: {title: 'Proportion Caring For Offspring', range: [0,1], tickformat: '.1f'}, yaxis:{title:'', ticksuffix: '%'}, font: {size: 16}});
+
+			trace5 = {
+			x: xAxisWeightDistributionNarrow,
+			y: distributionPercentageWeightArrayNarrow,
+			type: 'bar',
+			};
+
+			data5 = [trace5];
+// 100% max
+
+			Plotly.newPlot('weightPercentageNarrowed', data5 ,{title:'Sampling Distribution for the Sample Mean Weight', xaxis: {title: 'Weight (In Pounds)', range: [12,14], tickformat: '.1f'},yaxis:{title:'', ticksuffix: '%'}, font: {size: 16}});
+
+
+			trace6 = {
+				x: xAxisProportionDistributionNarrow,
+				y: distributionPercentageProportionArrayNarrow,
+				type: 'bar',
+			};
+//100% max
+			data6 = [trace6];
+
+			Plotly.newPlot('proportionPercentageNarrowed', data6 ,{title:'Sampling Distribution for the Sample Mean Proportion',xaxis: {title: 'Proportion Caring For Offspring', range: [.1,.3], tickformat: '.2f'}, yaxis:{title:'', ticksuffix: '%'},  font: {size: 16}});
+
+
+		}
+
+		function setSampleSize(newVal) {
+			mySampleSize = newVal;
+			clearTable();
+			drawASample();
+			clearSampleGraphs();
+			// clear the bottom 4 graphs
+		}
+
+
+	</script>
+	<title>Sampling App</title>
+
+	<style>
+
+	#sampleGraphs {
+	    width: 100%;
+			margin: 10 75 50 75px;
+	    overflow: auto;
+	}
+	#weightPercentage {
+	    float: left;
+	    width: 50%;
+	}
+	#proportionPercentage {
+		  margin-left: 50%;
+	    width: 50%;
+	}
+	#weightPercentageTotal {
+	    /*float: left;*/
+	    width: 100%;
+	}
+	#proportionPercentageTotal {
+		  /*margin-left: 50%;*/
+			float: left;
+	    width: 100%;
+	}
+
+	#weightPercentageNarrowed {
+	    /*float: left;*/
+	    width: 100%;
+	}
+	#proportionPercentageNarrowed {
+		  /*margin-left: 50%;*/
+			float: left;
+	    width: 100%;
+	}
+	#halfPageGraphs {
+	    width: 50%;
+			margin-left: 50%;
+	    overflow: auto;
+	}
+
+	#leftPageTable {
+		width: 50%;
+		float: left;
+		overflow: auto;
+	}
+
+	table, td {
+    border: 1px solid black;
+}
+
+	</style>
+
+</head>
+
+
+<body>
+
+
+	 <div id="sampleGraphs">
+	 		<div id="weightPercentage"></div>
+	 		<div id="proportionPercentage"></div>
+	  </div>
+
+		<form action="">
+		 <input type="radio" name="samplesDrawn" value="10" onclick=setSampleSize(10)> 10<br>
+		 <input type="radio" name="samplesDrawn" value="40" onclick=setSampleSize(40) checked="checked"> 40<br>
+		 <input type="radio" name="samplesDrawn" value="160" onclick=setSampleSize(160)> 160<br>
+		</form>
+
+	 <input type="button" id="drawSample" value="Draw a sample.">
+
+	 <br></br>
+
+	 <div id="title"> Weight [] Proportion </div>
+	 <div id="holdsMeans"> <b> Mean: </b> <span id="myMean"></span> </div>
+	 <div id="holdsSD"> <b> Standard Deviation: </b> <span id="myStandardDeviation"></span></div>
+	 <div id="holdsMin"> <b> Minimum: </b> <span id="myMin"></span></div>
+	 <div id="holdsMax"> <b> Maximum: </b> <span id="myMax"></span></div>
+
+	 <br></br>
+
+	 <form action="">
+  	<input type="radio" name="viewedGraph" value="weight" onclick=switchWeight() checked="checked"> Weight (In lbs)<br>
+  	<input type="radio" name="viewedGraph" value="offspring" onclick=switchOffspring()> Cares for Offspring<br>
+	 </form>
+
+	 <div id="sampleGraphs">
+
+		 <div id="leftPageTable">
+			 <table id="myTable">
+  		 	<tr>
+    			<td><b>Sample Number</b></td>
+    			<td><b>Weight (in lbs)</b></td>
+					<td><b>Proportion</b></td>
+  			</tr>
+			</table>
+			<br></br>
+
+			<div id="storeSample">
+	 	 		<input type="button" id="storeSample" value="Store this sample.">
+	 	 		<span id="sampleError"> </span>
+	  	 </div>
+
+		 </div>
+
+	 	  <div id ="halfPageGraphs">
+		 		<div id="proportionPercentageTotal"></div>
+	 			<div id="weightPercentageTotal"></div>
+				<div id="proportionPercentageNarrowed"></div>
+				<div id="weightPercentageNarrowed"></div>
+			</div>
+
+		</div>
+
+
+</body>
+
+</html>
