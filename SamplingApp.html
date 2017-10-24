@@ -199,7 +199,7 @@ function round(value, decimals) {
 				Plotly.newPlot('weightPercentage', data , {
 					title:'Current Galoot Sample',
 					xaxis: {title: 'Weight (In Pounds)', autotick: false, ticks: 'outside', tick0: 0, dtick: 2, ticklen: 8, tickwidth: 4, tickcolor: '#000'},
-					yaxis:{title:'', range: [0,16], ticksuffix: '%', autotick: false, ticks: '', tick0: 0, dtick: 2, ticklen: 8, tickwidth: 0, tickcolor: '#000'},
+					yaxis:{title:'Relative Frequency (Percent)', range: [0,16], ticksuffix: '%', autotick: false, ticks: '', tick0: 0, dtick: 2, ticklen: 8, tickwidth: 0, tickcolor: '#000'},
 					font: {size: 16, family: 'Roboto Slab, serif', color: '#3B317D'}});
 
 				trace2 = {
@@ -214,7 +214,7 @@ function round(value, decimals) {
 				Plotly.newPlot('proportionPercentage', data2 ,{
 					title:'Current Galoot Sample',
 					xaxis: {title: 'Cares For Offsprings', autotick: false, ticks: 'outside', tick0: 0, dtick: 1, ticklen: 8, tickwidth: 4, tickcolor: '#000'},
-					yaxis:{title:'', range: [0,100], ticksuffix: '%', autotick: false, ticks: '', tick0: 0, dtick: 10, ticklen: 8, tickwidth: 0, tickcolor: '#000'},
+					yaxis:{title:'Relative Frequency (Percent)', range: [0,100], ticksuffix: '%', autotick: false, ticks: '', tick0: 0, dtick: 10, ticklen: 8, tickwidth: 0, tickcolor: '#000'},
 					font: {size: 16,family: 'Roboto Slab, serif', color: '#3B317D'}});
 
 				trace3 = {
@@ -424,7 +424,7 @@ function round(value, decimals) {
 
 		function clearTable() {
 			var table = document.getElementById("myTable");
-			table.innerHTML = "<tr><td><b>Sample Number</b></td><td><b>Weight (In Pounds)</b></td><td><b>Proportion</b></td></tr>";
+			table.innerHTML = "<tr><td><b>Repetition</b></td><td><b>Weight</b></td><td><b>Cares for Offspring</b></td></tr>";
 			rowLocation = 1;
 		}
 
@@ -597,7 +597,7 @@ function round(value, decimals) {
 		function setSampleSize(newVal) {
 			mySampleSize = newVal;
 			clearTable();
-			drawASample();
+			//drawASample();
 			clearSampleGraphs();
 			// clear the bottom 4 graphs
 		}
@@ -731,6 +731,20 @@ h4{
 	 margin-right: 7%;
 	 padding:0px 7%;
    }
+
+	 .button {
+	     background-color: #E8E8E8;
+	     border: none;
+			 font: 1em Roboto Slab, serif;
+		   color:#3B317D;
+			 border: 1px solid gray;
+	     padding: 10px 15px;
+	     text-align: center;
+	     text-decoration: none;
+	     display: inline-block;
+	     font-size: 16px;
+	 }
+
 }
 
 	</style>
@@ -740,33 +754,38 @@ h4{
 
 <body>
 
-	<h1> Galoot Sampling Simulation </h1>
+	<h1> Random Sampling </h1>
 
 	<div class="grey_box">
 		<center>
 			<br/>
+			<p>In this app, you will draw a random sample from the population of all Galoots on Planet Z.</p>
+
 			<div id="leftThird">
-				<br/>
+				<br/><br/><br/><br/><br/><br/><br/>
 				<img src="Galoot.png" alt="Galoot" height="240" width="240">
 				<p><i> A Galoot</i></p>
 			</div>
-			<div id="rightThird">
-			<p> <b>Step 1:</b> Choose what you will study.</p>
+			<div id="rightThird">   
 			<form action="">
+			<p> <b>Step 1:</b> Choose the variable you want to graph: </p>
 			 <input type="radio" name="viewedGraph" value="weight" onclick=switchWeight() checked="checked"> Weight (In Pounds)
 			 <input type="radio" name="viewedGraph" value="offspring" onclick=switchOffspring()> Cares for Offspring
+
 			</form>
 			<br/>
-			<p> <b>Step 2:</b> Choose your sample size.</p>
+			<p> <b>Step 2:</b> Choose the sample size you want to use: </p>
 			<form action="">
 			 <input type="radio" name="samplesDrawn" value="10" onclick=setSampleSize(10)> 10
 			 <input type="radio" name="samplesDrawn" value="40" onclick=setSampleSize(40) checked="checked"> 40
 			 <input type="radio" name="samplesDrawn" value="160" onclick=setSampleSize(160)> 160
 		 </form>
 		 <br/>
-			<p> <b>Step 3:</b> Sample the population.</b><br/>
-			<input type="button" id="drawSample" value="Draw a sample">
-			</p>
+			<p> <b>Step 3:</b> Click on “Draw a sample” to draw your first sample of Galoots. <br/>	</p>
+			<br/>
+			<p> <b> Step 4: </b> Click “Store result” to write the sample mean to the data table in the lower left. This also adds the sample mean to the empirical sampling distribution on the lower right, and draws a new random sample of the same size. </p>
+			<p> Note: Step 4 can be repeated as many times as you like. The more data you add to the empirical sampling distribution, the more it will accurately represent the theoretical sampling distribution for the sample mean.</p>
+			<p> Anytime you want to start over you can either click on “Clear all data” or change either the variable or sample size.</p>
 			<br/>
 		</div>
 		</center>
@@ -782,12 +801,16 @@ h4{
 
 	 <center>
 		 <div id="rightPageSummary">
-			 <br/> <br/> <br/> <br/> <br/> <br/>
+			 <br/> <br/>
+
+			 <input type="button" class="button" id="drawSample" value="Draw a sample">
+			 <p> Descriptive Statistics for the Current Sample </p>
+
 	 <table id="sampleSummary">
 		<tr>
 			<td><b></b></td>
-			<td><b>Weight (In Pounds)</b></td>
-			<td><b>Proportion</b></td>
+			<td><b>Weight</b></td>
+			<td><b>Cares for Offspring</b></td>
 		</tr>
 		<tr>
 			<td><b>Mean</b></td>
@@ -813,7 +836,7 @@ h4{
 
 	<div id="storeSample">
 		<div id="sampleError"> &nbsp;</div>
-		<input type="button" id="storeSample" value="Store this sample.">
+		<input type="button" class="button" id="storeSample" value="Store result">
 
 	 </div>
  </div>
@@ -827,9 +850,9 @@ h4{
 			 <br/> <br/> <br/>
 			 <center><table id="myTable">
   		 	<tr>
-    			<td><b>Sample Number</b></td>
-    			<td><b>Weight (In Pounds)</b></td>
-					<td><b>Proportion</b></td>
+    			<td><b>Repetition</b></td>
+    			<td><b>Weight</b></td>
+					<td><b>Cares for Offspring</b></td>
   			</tr>
 			</table></center>
 			<br/>
