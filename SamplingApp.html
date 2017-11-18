@@ -553,8 +553,10 @@
 
 			getNewSample(mySampleSize);
 
-			Plotly.restyle('weightPercentage', 'y', [samplePercentageWeightArray]);
-			Plotly.restyle('proportionPercentage', 'y', [samplePercentageProportionArray]);
+			redrawFirstGraphs()
+
+			//Plotly.restyle('weightPercentage', 'y', [samplePercentageWeightArray]);
+			//Plotly.restyle('proportionPercentage', 'y', [samplePercentageProportionArray]);
 		}
 
 		window.onload = function() {
@@ -781,41 +783,21 @@
 
 		function redrawFirstGraphs() {
 
-			var update1 = {
-				'xaxis.range': [arrayMin(xAxisWeightDistributionNarrow)-.5, arrayMax(xAxisWeightDistributionNarrow)+.5],   // updates the xaxis range
-			};
-			var update2 = {
-				'xaxis.range': [arrayMin(xAxisProportionDistributionNarrow)-.05, arrayMax(xAxisProportionDistributionNarrow) + .05],   // updates the xaxis range
-			};
-
-			var widthsForWColumns = Array(distributionPercentageWeightArray.length).fill(.8);
-			var widthsForPColumns = Array(distributionPercentageProportionArray.length).fill(.08);
-			var widthsForWNColumns = Array(distributionPercentageWeightArrayNarrow.length).fill(.08);
-			var widthsForPNColumns = Array(distributionPercentageProportionArrayNarrow.length).fill(.008);
+			var update = weightDisplayed ? {'yaxis.range[1]': arrayMax(samplePercentageWeightArray)} : {'yaxis.range[1]': arrayMax(samplePercentageProportionArray)};
 
 			if(weightDisplayed){
-				Plotly.relayout('weightPercentageNarrowed', update1);
+				Plotly.relayout('weightPercentage', update);
 
-				Plotly.restyle('weightPercentageTotal', 'x', [xAxisWeightDistribution]);
-				Plotly.restyle('weightPercentageTotal', 'y', [distributionPercentageWeightArray]);
-
-				Plotly.restyle('weightPercentageNarrowed', 'x', [xAxisWeightDistributionNarrow]);
-				Plotly.restyle('weightPercentageNarrowed', 'y', [distributionPercentageWeightArrayNarrow]);
-
-				Plotly.restyle('weightPercentageTotal', 'width', [widthsForWColumns]);
-				Plotly.restyle('weightPercentageNarrowed', 'width', [widthsForWNColumns]);
+				//Plotly.restyle('weightPercentageTotal', 'x', [xAxisWeightDistribution]);
+				Plotly.restyle('weightPercentage', 'y', [samplePercentageWeightArray]);
 
 			}
 			else {
-				Plotly.relayout('proportionPercentageNarrowed', update2);
-				Plotly.restyle('proportionPercentageTotal', 'x', [xAxisProportionDistribution]);
-				Plotly.restyle('proportionPercentageTotal', 'y', [distributionPercentageProportionArray]);
+				Plotly.relayout('proportionPercentage', update);
 
-				Plotly.restyle('proportionPercentageNarrowed', 'x', [xAxisProportionDistributionNarrow]);
-				Plotly.restyle('proportionPercentageNarrowed', 'y', [distributionPercentageProportionArrayNarrow]);
+				//Plotly.restyle('proportionPercentageTotal', 'x', [xAxisProportionDistribution]);
+				Plotly.restyle('proportionPercentage', 'y', [samplePercentageProportionArray]);
 
-				Plotly.restyle('proportionPercentageTotal', 'width', [widthsForPColumns]);
-				Plotly.restyle('proportionPercentageNarrowed', 'width', [widthsForPNColumns]);
 
 			}
 
