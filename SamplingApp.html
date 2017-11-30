@@ -1,4 +1,4 @@
-﻿<!DOCTYPE HTML>
+<!DOCTYPE HTML>
 <html>
 <head>
 
@@ -6,7 +6,16 @@
 
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
 	<script type="text/javascript">
+
+	$(function() {
+		$('[data-toggle="tooltip"]').tooltip();
+	});
 
 	var weightDisplayed = true;
 	var sampleStored = false;
@@ -562,7 +571,19 @@
 		window.onload = function() {
 			(document.getElementById("drawSample")).onclick = drawASample;
 			(document.getElementById("storeSample")).onclick = storeASample;
+			(document.getElementById("drawStore10Sample")).onclick = drawStore10Samples;
 		};
+
+		var drawStore10Samples = function() {
+			for(var i = 0; i < 9; i++){
+				drawASample();
+				storeASample();
+		}
+		var elemError = document.getElementById("sampleError");
+		elemError.innerHTML = "&nbsp;";
+
+		sampleStored = false;
+		}
 
 
 		function refactorDistributionPercentage(arrayVal) {
@@ -601,6 +622,10 @@
 		}
 
 		var storeASample = function() {
+			if(rowLocation >= 10){
+				$(document.getElementById("drawStore10Sample")).css("visibility", "visible");
+				$(document.getElementById("drawStore10Sample")).prop("disabled", false);
+			}
 			if ((sampleWeightArray.length != 0 && sampleProportionArray.length != 0) && !sampleStored) {
 
 				var elemError = document.getElementById("sampleError");
@@ -741,15 +766,24 @@
 			//cell4.innerHTML = round(meanProportion,2);
 			rowLocation = rowLocation + 1;
 
+			$(cell1).addClass("border")
+			$(cell2).addClass("border")
+			$(cell3).addClass("border")
+
 		}
 
 		function clearTable() {
+
+			$(document.getElementById("drawStore10Sample")).css("visibility", "hidden");
+			$(document.getElementById("drawStore10Sample")).prop("disabled", true);
+
+
 			var table = document.getElementById("myTable");
 			if(weightDisplayed){
-				table.innerHTML = "<tr><td><b>Repetition</b></td><td><b>Sample Size</b></td><td id= 'thirdHeader'><b>Weight</b></td></tr>";
+				table.innerHTML = "<tr><td class='border'><b>Repetition</b></td><td class='border'><b>Sample Size</b></td><td id= 'thirdHeader'><b>Weight</b></td></tr>";
 			}
 			else{
-				table.innerHTML = "<tr><td><b>Repetition</b></td><td><b>Sample Size</b></td><td id= 'thirdHeader'><b>Cares For Offspring</b></td></tr>";
+				table.innerHTML = "<tr><td class='border'><b>Repetition</b></td><td class='border'><b>Sample Size</b></td><td id= 'thirdHeader'><b>Cares For Offspring</b></td></tr>";
 
 			}
 						rowLocation = 1;
@@ -966,55 +1000,39 @@
 	}
 
 	#leftThird {
-		width: 30%;
-		float: left;
-		display: block;
+					width: 20%;
+					float: left;
+					display: block;
+					margin-top: 0px;
+					background-color: red;
+					height: 10em;
+					position: absolute;
+			}
+			#rightThird {
+					width: 40%;
+					margin-left: 60%;
+					display: block;
+					margin-top: 0px;
+					background-color: blue;
+					height: 10em;
+					position: absolute;
+			}
+			#middleThird {
+					width: 40%;
+					margin-left: 20%;
+					margin-right: 60%;
+					display: block;
+					margin-top: 0px;
+					background-color: grey;
+					height: 10em;
+					float: left;
+					position: absolute;
+			}
+	.mtooltip {
+		border-bottom: 1px dotted #000;
+		text-decoration: none;
+
 	}
-	#rightThird {
-		width: 70%;
-		margin-left: 30%;
-		display: block;
-		margin-top: 0px;
-	}
-
-	.tooltip {
-    position: relative;
-    display: inline-block;
-    border-bottom: 1px dotted black;
-}
-
-.tooltip .tooltiptext {
-    visibility: hidden;
-    width: 220px;
-    background-color: #555;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 10px;
-    position: absolute;
-    z-index: 1;
-    bottom: 125%;
-    left: 0%;
-    margin-left: -80px;
-    opacity: 0;
-    transition: opacity 1s;
-}
-
-.tooltip .tooltiptext::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #555 transparent transparent transparent;
-}
-
-.tooltip:hover .tooltiptext {
-    visibility: visible;
-    opacity: 1;
-}
 
 	body {
    background:#FFFFFF;
@@ -1055,21 +1073,23 @@ h4{
    margin-bottom:10px;
 }
 
-	table, td {
-    border: 1px solid black;
-		text-align: center;
+.border {
+	border: 1px solid black;
+	text-align: center;
 }
+
 	td {
 		padding-left: 5px;
 		padding-right: 5px;
 	}
 
+
 .grey_box{
    margin-top:30px;
    background:#E8E8E8;
    font-size:1.2em;
-	 margin-left: 7%;
-	 margin-right: 7%;
+	 margin-left: 3%;
+	 margin-right: 3%;
 	 padding:10px 50px;
    }
 
@@ -1095,46 +1115,89 @@ h4{
 
 <body>
 
+	<div class="container">
+		<div class="row">
+
+		<div class="col">
+
+			<center>
+
 	<h1> Random Sampling </h1>
+</center>
+
+</div>
+	</div>
 
 	<div class="grey_box">
 		<center>
 			<br/>
-			<p>In this app, you will draw a random sample from the population of all <span class="tooltip">Galoots<span class="tooltiptext">Imagine Big Alien Chickens.</span></span> on <span class="tooltip">Planet Z<span class="tooltiptext">A far away planet ideal for practicing statistical methods.</span></span>.</p>
+			<p>In this app, you will draw a random sample from the population of all <span class="mtooltip" data-toggle="tooltip" title="Imagine Big Alien Chickens.">Galoots</span> on <span class="mtooltip" data-toggle="tooltip" title="A far away planet ideal for practicing statistical methods.">Planet Z</span>.</p>
+</center>
+			<div class="row align-items-center">
+				<div class="col-md-2 ">
+					<img src="Galoot.png" alt="Galoot" height="200" width="130" />
+					<center><p><i> A Galoot</i></p></center>
+				</div>
+				<div class="col-md-10">
+					<div class="row">
+						<div class="col-md-7">
 
-<!--
+							<table style="width:100%" border="0">
+								  <tr>
+								    <td valign="top" style="width:80px;"><b>Step 1:</b></td>
+								    <td valign="top">Choose the variable you want to graph:</td>
+								  </tr>
+								</table>
+						</div>
+						<div class="col-md-5">
+							<form action="">
+								<p>
+									<input type="radio" name="viewedGraph" value="weight" onclick=switchWeight() checked="checked"> <span class="mtooltip" data-toggle="tooltip" title="To keep things simple, all weights are reported in pounds based on standard Earth gravity."> Weight</span><span style="margin-right: 25px;"></span>
+ 								 <input type="radio" name="viewedGraph" value="offspring" onclick=switchOffspring()><span class="mtooltip" data-toggle="tooltip" title="This variable has a value of 1 for any Galoot who cares for their offspring, otherwise the value is 0."> Cares for Offspring</span>
+								</p>
+							</form>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-7">
+							<table style="width:100%" border="0">
+								  <tr>
+								    <td valign="top" style="width:80px;"><b>Step 2:</b></td>
+								    <td valign="top">Choose the sample size you want to use:</td>
+								  </tr>
+								</table>
+								<br/>
+						</div>
+						<div class="col-md-5">
+							<form action="">
+							 <input type="radio" name="samplesDrawn" value="10" onclick=setSampleSize(10)> <span style="margin-right: 45px;">10</span>
+							 <input type="radio" name="samplesDrawn" value="40" onclick=setSampleSize(40) checked="checked"> <span style="margin-right: 45px;">40</span>
+							 <input type="radio" name="samplesDrawn" value="160" onclick=setSampleSize(160)> <span style="margin-right: 45px;">160</span>
+							</form>
+						</div>
+					</div>
+					<table style="width:100%" border="0">
+							<tr>
+								<td valign="top" style="width:80px;"><b>Step 3:</b></td>
+								<td valign="top">Click on "Draw a sample" to draw your first sample of Galoots.</td>
+							</tr>
+							<tr>
+								<td valign="top" style="width:80px;">&nbsp;</td>
+							</tr>
+							<tr>
+								<td valign="top" style="width:80px;"><b>Step 4:</b></td>
+								<td valign="top">Click "Store result" to write the sample mean to the data table in the lower left. This also adds the sample mean to the empirical sampling distribution on the lower right.</td>
+							</tr>
+					</table>
+					<br/>
+					<p> Note: Step 4 can be repeated as many times as you like. The more data you add to the empirical sampling distribution, the more it will accurately represent the theoretical sampling distribution for the sample mean.</p>
+					<p> Anytime you want to start over you can either click on "Clear all data" or change either the variable or sample size.</p>
 
-<span class="tooltip">Cares for Offspring<span class="tooltiptext">This variable has a value of 1 for any Galoot who cares for their offspring, otherwise the value is 0.</span></span>
-
-
--->
-
-<form action="">
-<p> <b>Step 1:</b> Choose the variable you want to graph: 
- <input type="radio" name="viewedGraph" value="weight" onclick=switchWeight() checked="checked"> <span class="tooltip"> Weight<span class="tooltiptext">To keep things simple, all weights are reported in pounds based on standard Earth gravity.</span></span>
- <input type="radio" name="viewedGraph" value="offspring" onclick=switchOffspring()><span class="tooltip"> Cares for Offspring<span class="tooltiptext">This variable has a value of 1 for any Galoot who cares for their offspring, otherwise the value is 0.</span></span>
-</p>
-</form>
-
-<form action="">
-	<p> <b>Step 2:</b> Choose the sample size you want to use: 
- <input type="radio" name="samplesDrawn" value="10" onclick=setSampleSize(10)> 10
- <input type="radio" name="samplesDrawn" value="40" onclick=setSampleSize(40) checked="checked"> 40
- <input type="radio" name="samplesDrawn" value="160" onclick=setSampleSize(160)> 160
-</p>
-</form>
-			<div id="leftThird">
-				<img src="Galoot.png" alt="Galoot" height="240" width="240" />
-				<p><i> A Galoot</i></p>
+				</div>
 			</div>
-			<div id="rightThird">
-				<p> <b>Step 3:</b> Click on "Draw a sample" to draw your first sample of Galoots. </p>
-				<p> <b>Step 4:</b> Click “Store result” to write the sample mean to the data table in the lower left. This also adds the sample mean to the empirical sampling distribution on the lower right, and draws a new random sample of the same size. </p>
-				<p> Note: Step 4 can be repeated as many times as you like. The more data you add to the empirical sampling distribution, the more it will accurately represent the theoretical sampling distribution for the sample mean.</p>
-				<p> Anytime you want to start over you can either click on "Clear all data" or change either the variable or sample size.</p>
-			</div>
-		</center>
+
 	</div>
+
 	 <div id="leftPageTable">
 		 <div id="proportionPercentage"></div>
 	 		<div id="weightPercentage"></div>
@@ -1151,32 +1214,35 @@ h4{
 			 <span id="sampleSummarySize"> &nbsp;</span>
 		 </p>
 
-	 <table id="sampleSummary">
+	 <table id="sampleSummary" class="border">
 		<tr>
-			<td><b></b></td>
-			<td><b><span id"variableSampled">Weight</span></b></td>
+			<td class="border"><b></b></td>
+			<td class="border"><b><span id"variableSampled">Weight</span></b></td>
 		</tr>
 		<tr>
-			<td><b><span id="meanTitle">Mean</span></b></td>
-			<td><span id="tableMean">0 lbs</span></td>
+			<td class="border"><b><span id="meanTitle">Mean</span></b></td>
+			<td class="border"><span id="tableMean">0 lbs</span></td>
 		</tr>
 		<tr>
-			<td><b>Standard Deviation</b></td>
-			<td id="tableSD">0 lbs</td>
+			<td class="border"><b>Standard Deviation</b></td>
+			<td id="tableSD" class="border">0 lbs</td>
 		</tr>
 		<tr>
-			<td><b>Minimum</b></td>
-			<td id="tableMin">0 lbs</td>
+			<td class="border"><b>Minimum</b></td>
+			<td id="tableMin" class="border">0 lbs</td>
 		</tr>
 		<tr>
-			<td><b>Maximum</b></td>
-			<td id="tableMax">0 lbs</td>
+			<td class="border"><b>Maximum</b></td>
+			<td id="tableMax" class="border">0 lbs</td>
 		</tr>
 	</table>
 
 	<div id="storeSample">
 		<div id="sampleError"> &nbsp;</div>
-		<input type="button" class="button" id="storeSample" value="Store result">
+		<input type="button" class="button" id="storeSample" value="Store result" style="margin-bottom: 15px;" />
+		<br/>
+			<button class="button" disabled id="drawStore10Sample" style="visibility: hidden;"><b>Draw and Store 10 Samples</b></button>
+
 
 	 </div>
  </div>
@@ -1191,17 +1257,17 @@ h4{
 			 <center><p> Descriptive Statistics for the Emperical Sampling Distribution</br>
 				<i>Data from <span id="distributionSummarySize">0 Repetitions</span> of the Sampling Process</i></p>
 
-			 <table id="myTable">
+			 <table id="myTable" class="border">
   		 	<tr>
-    			<td><b>Repetition</b></td>
-					<td><b>Sample Size</b></td>
-    			<td id="thirdHeader"><b>Weight</b></td>
+    			<td class="border"><b>Repetition</b></td>
+					<td class="border"><b>Sample Size</b></td>
+    			<td id="thirdHeader" class="border"><b>Weight</b></td>
   			</tr>
 			</table></center>
 			<br/>
 
 
-			 <center><input type="button" id="clearSamples" value="Clear all data." onclick=clearData()></center>
+			 <center><input type="button" class="button" id="clearSamples" value="Clear all data." onclick=clearData()></center>
 
 		 </div>
 	 	  <div id ="halfPageGraphs">
@@ -1213,6 +1279,7 @@ h4{
 			</div>
 
 		</div>
+	</div>
 
 
 </body>
